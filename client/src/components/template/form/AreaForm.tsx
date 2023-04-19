@@ -3,6 +3,7 @@ import { InputHTMLAttributes } from "react";
 interface AreaFormProps extends InputHTMLAttributes<HTMLInputElement> {
     label: string;
     register: any;
+    errorMessage?: string;
 }
 
 const classes = {
@@ -20,7 +21,7 @@ const classes = {
 };
 
 export function AreaForm(props: AreaFormProps) {
-    const { label, register } = props;
+    const { label, register, errorMessage } = props;
 
     return (
         <div className={classes.areaForm}>
@@ -30,7 +31,9 @@ export function AreaForm(props: AreaFormProps) {
                 placeholder={label}
                 className={classes.input}
             />
-            {/* <span className={classes.spanError}>Error Message</span> */}
+            {errorMessage && (
+                <span className={classes.spanError}>{errorMessage}</span>
+            )}
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import "./globals.css";
+import ApolloClientProvider from "@/components/apollo/ApolloClientProvider";
 
 export const metadata = {
     title: "Fullstack Auth",
@@ -13,8 +14,8 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body>
-				{children}
-			</body>
+                <ApolloClientProvider>{children}</ApolloClientProvider>
+            </body>
         </html>
     );
 }
