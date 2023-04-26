@@ -18,9 +18,14 @@ type Mutation {
   signup(data: SignupInput!): User!
 }
 
+input Pagination {
+  skip: Float!
+  take: Float!
+}
+
 type Query {
   userByToken(token: String!): User
-  users: [User!]!
+  users(pagination: Pagination!): [User!]!
 }
 
 input SignupInput {

@@ -5,12 +5,21 @@ import SignuptInput from "../inputs/SignupInput";
 import { compare, hash } from "bcryptjs";
 import LoginInput from "../inputs/LoginInput";
 import { randomUUID } from "crypto";
+import Pagination from "../inputs/Pagination";
 
 @Resolver()
 export class UserResolver {
     @Query(() => [User])
-    async users(@Ctx() ctx: PrismaContext) {
-        const users = await ctx.prisma.user.findMany();
+    async users(
+        @Arg("pagination") pagination: Pagination,
+        @Ctx() ctx: PrismaContext
+    ): Promise<User[]> {
+        const { skip, take } = pagination;
+        const users = await ctx.prisma.user.findMany({
+            skip,
+            take,
+        });
+
         return users;
     }
 

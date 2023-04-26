@@ -22,7 +22,9 @@ export function ToggleFormModeLink({
     return (
         <div className="my-5" onClick={toggleMode}>
             <span className={classes.span}>{lable}</span>{" "}
-            <a className={classes.link}>{formMode}</a>
+            <a className={classes.link}>
+                {formMode === "Login" ? "Sgnup" : "Login"}
+            </a>
         </div>
     );
 }

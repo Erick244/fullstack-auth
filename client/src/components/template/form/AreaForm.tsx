@@ -1,6 +1,7 @@
 import { InputHTMLAttributes } from "react";
 
-interface AreaFormProps extends InputHTMLAttributes<HTMLInputElement> {
+interface AreaFormProps {
+    inputProps: InputHTMLAttributes<HTMLInputElement>;
     label: string;
     register: any;
     errorMessage?: string;
@@ -21,12 +22,12 @@ const classes = {
 };
 
 export function AreaForm(props: AreaFormProps) {
-    const { label, register, errorMessage } = props;
+    const { label, register, errorMessage, inputProps } = props;
 
     return (
         <div className={classes.areaForm}>
             <input
-                {...props}
+                {...inputProps}
                 {...register}
                 placeholder={label}
                 className={classes.input}

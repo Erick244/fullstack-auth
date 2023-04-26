@@ -16,10 +16,6 @@ const SIGNUP_USER = gql`
     mutation ($data: SignupInput!) {
         signup(data: $data) {
             id
-            name
-            email
-            createdAt
-            updatedAt
         }
     }
 `;
@@ -36,13 +32,13 @@ function SignupForm({ formMode, toggleMode }: SignupFormProps) {
     const [signupUser, { loading }] = useMutation(SIGNUP_USER);
 
     async function handlerSignup(data: SignupFormData) {
-        const user = await signupUser({
+        await signupUser({
             variables: {
                 data,
             },
         });
 
-		console.log(user);
+        toggleMode();
     }
 
     return (
@@ -53,25 +49,25 @@ function SignupForm({ formMode, toggleMode }: SignupFormProps) {
         >
             <AreaForm
                 label="Name"
-                type="text"
+                inputProps={{ type: "text" }}
                 register={register("name")}
                 errorMessage={errors.name?.message}
             />
             <AreaForm
                 label="E-mail"
-                type="email"
+                inputProps={{ type: "email" }}
                 register={register("email")}
                 errorMessage={errors.email?.message}
             />
             <AreaForm
                 label="Password"
-                type="password"
+                inputProps={{ type: "password" }}
                 register={register("password")}
                 errorMessage={errors.password?.message}
             />
             <AreaForm
                 label="Confirm Password"
-                type="password"
+                inputProps={{ type: "password" }}
                 register={register("confirmPassword")}
                 errorMessage={errors.confirmPassword?.message}
             />
@@ -80,7 +76,7 @@ function SignupForm({ formMode, toggleMode }: SignupFormProps) {
                 formMode={formMode}
                 toggleMode={toggleMode}
             />
-            <SubmitButton label="Next" />
+            <SubmitButton label="Next" loading={loading} />
         </form>
     );
 }

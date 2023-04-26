@@ -5,6 +5,7 @@ import { ToggleFormModeLink } from "@/components/template/form/ToggleFormModeLin
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginFormSchema } from "@/schemas/zodAuthFormSchemas";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface LoginFormProps {
     toggleMode: () => void;
@@ -20,8 +21,10 @@ function LoginForm({ formMode, toggleMode }: LoginFormProps) {
         resolver: zodResolver(loginFormSchema),
     });
 
-    function handlerLogin(data: LoginFormData) {
-        console.log(data);
+    const { login, loginLoading } = useAuthContext();
+
+    async function handlerLogin(data: LoginFormData) {
+        await login(data);
     }
 
     return (
@@ -32,13 +35,13 @@ function LoginForm({ formMode, toggleMode }: LoginFormProps) {
         >
             <AreaForm
                 label="E-mail"
-                type="email"
+                inputProps={{ type: "email" }}
                 register={register("email")}
                 errorMessage={errors.email?.message}
             />
             <AreaForm
                 label="Password"
-                type="password"
+                inputProps={{ type: "password" }}
                 register={register("password")}
                 errorMessage={errors.password?.message}
             />
@@ -48,7 +51,7 @@ function LoginForm({ formMode, toggleMode }: LoginFormProps) {
                 formMode={formMode}
                 toggleMode={toggleMode}
             />
-            <SubmitButton label="Enter" />
+            <SubmitButton label="Enter" loading={loginLoading} />
         </form>
     );
 }
