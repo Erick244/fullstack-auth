@@ -12,7 +12,7 @@ const classes = {
     menuPreview: `
 		flex items-center gap-2
 		w-40 sm:w-48 p-1
-		bg-gray-700 text-white active:bg-gray-700/70
+		bg-purple-950 text-white active:bg-purple-700/70
 		rounded  cursor-pointer hover:shadow-md
 	`,
     gravatar: `
@@ -26,7 +26,7 @@ const classes = {
         const defaultClasses = `
 			flex flex-col gap-2
 			w-full absolute p-2
-			bg-gray-600  shadow-lg rounded-b
+			bg-stone-800  shadow-lg rounded-b
 		`;
 
         const conditionalClasses = conditional

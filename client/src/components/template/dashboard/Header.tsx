@@ -14,7 +14,7 @@ const classes = {
     header: `
 		flex justify-between items-center
 		shadow-lg shadow-black/40
-		bg-gray-600 h-16 z-10
+		bg-stone-800 h-16 z-10
 	`,
 };
 

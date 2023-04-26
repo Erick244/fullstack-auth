@@ -9,7 +9,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
     return (
-        <div className="h-screen bg-gradient-to-r to-slate-500 from-gray-500">
+        <div className="h-screen bg-gradient-to-r to-stone-700 via-purple-950 from-stone-700">
             <Header>
                 <Title title="Dashboard" icon={DashboardIcon} />
                 <DropDownMenu>
