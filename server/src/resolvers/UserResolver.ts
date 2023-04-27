@@ -7,6 +7,8 @@ import LoginInput from "../inputs/LoginInput";
 import { randomUUID } from "crypto";
 import Pagination from "../inputs/Pagination";
 
+// Criar tratamento de erros!
+
 @Resolver()
 export class UserResolver {
     @Query(() => [User])
@@ -114,4 +116,10 @@ export class UserResolver {
 
         return userAndToken;
     }
+
+    @Query(() => Number)
+    async userCount(@Ctx() ctx: PrismaContext): Promise<Number> {
+		const userCount = await ctx.prisma.user.count();
+		return userCount;
+	}
 }

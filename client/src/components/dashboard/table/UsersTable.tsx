@@ -1,7 +1,11 @@
 "use client";
 import ClientGravatar from "@/components/utilities/ClientGravatar";
+import { paginationSkipAtom } from "@/contexts/Jotai";
 import { User } from "@/interfaces/User";
 import { gql, useQuery } from "@apollo/client";
+import { useAtomValue } from "jotai";
+
+// criar skeletons screens e botão de mostrar mais
 
 const classes = {
     table: `
@@ -42,7 +46,6 @@ function Thead() {
     return (
         <thead className={classes.thead}>
             <tr>
-                <Th>Index</Th>
                 <Th>Gravatar</Th>
                 <Th>Name</Th>
                 <Th>E-mail</Th>
@@ -65,14 +68,26 @@ const GET_USERS_TABLE = gql`
 `;
 
 function Tbody() {
+    const paginationSkip = useAtomValue(paginationSkipAtom);
+
     const { data, loading } = useQuery(GET_USERS_TABLE, {
         variables: {
             pagination: {
                 take: 5,
-                skip: 0,
+                skip: paginationSkip,
             },
         },
     });
+
+    if (loading) {
+        return (
+            <tbody>
+                <tr>
+                    <td>Loading...</td>
+                </tr>
+            </tbody>
+        );
+    }
 
     return (
         <tbody>
@@ -80,7 +95,6 @@ function Tbody() {
                 data.users.map((user: User, index: number) => {
                     return (
                         <tr key={user.email} className={classes.tr}>
-                            <td>{index}</td>
                             <GravatarTd>
                                 <ClientGravatar
                                     email={user.email}

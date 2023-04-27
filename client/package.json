@@ -11,6 +11,7 @@
     "dependencies": {
         "@apollo/client": "^3.7.12",
         "@hookform/resolvers": "^3.1.0",
+        "@swc-jotai/react-refresh": "^0.0.7",
         "@types/cookie": "^0.5.1",
         "@types/node": "18.15.11",
         "@types/react": "18.0.37",
@@ -20,6 +21,7 @@
         "eslint": "8.36.0",
         "eslint-config-next": "13.2.4",
         "graphql": "^16.6.0",
+        "jotai": "^2.0.4",
         "next": "^13.3.0",
         "nookies": "^2.5.2",
         "postcss": "8.4.22",

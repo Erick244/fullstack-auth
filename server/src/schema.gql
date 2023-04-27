@@ -25,6 +25,7 @@ input Pagination {
 
 type Query {
   userByToken(token: String!): User
+  userCount: Float!
   users(pagination: Pagination!): [User!]!
 }
 
