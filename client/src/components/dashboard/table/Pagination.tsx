@@ -2,8 +2,7 @@
 import { AngleLeftIcon, AngleRightIcon } from "@/components/utilities/Icons";
 import { paginationSkipAtom } from "@/contexts/Jotai";
 import { gql, useQuery } from "@apollo/client";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 
 const classes = {
     pagination: `
@@ -55,11 +54,15 @@ function AngleAction({ direction, onClick }: AngleActionProps) {
 type PageCountItemProps = {
     label: string;
     activeItem?: boolean;
+    onClick: () => void;
 };
 
-function PageCountItem({ label, activeItem }: PageCountItemProps) {
+function PageCountItem({ label, activeItem, onClick }: PageCountItemProps) {
     return (
-        <span className={classes.pageCountItem(activeItem ?? false)}>
+        <span
+            className={classes.pageCountItem(activeItem ?? false)}
+            onClick={onClick}
+        >
             {label}
         </span>
     );
@@ -71,21 +74,24 @@ const USER_COUNT = gql`
     }
 `;
 
-function PagesCount() {
+function usePaginationCount() {
     const { data, loading } = useQuery(USER_COUNT);
-    const paginationSkip = useAtomValue(paginationSkipAtom);
-
-    if (loading) return <p>Loading...</p>;
+    const [paginationSkip, setPaginationSkip] = useAtom(paginationSkipAtom);
 
     const take = 5;
-    const userCount = data?.userCount || 1;
+    const userCount = data?.userCount;
     const pages = Math.ceil(userCount / take);
 
-    const activeItem =
-        paginationSkip === 0 ? 1 : (paginationSkip / take) + 1;
+    function handlerSetPaginationByItem(item: number) {
+        const skip = item > 1 ? take * (item - 1) : paginationSkip * (item - 1);
+        setPaginationSkip(skip);
+    }
+
+    const activeItem = paginationSkip === 0 ? 1 : paginationSkip / take + 1;
 
     function genPageCountItems() {
         const pageCountItems = [];
+
         for (let i = 1; i <= pages; i++) {
             const isActiveItem = activeItem === i;
             const newPageCountItem = (
@@ -93,29 +99,65 @@ function PagesCount() {
                     label={i.toString()}
                     key={i}
                     activeItem={isActiveItem}
+                    onClick={() => handlerSetPaginationByItem(i)}
                 />
             );
+
             pageCountItems.push(newPageCountItem);
         }
 
         return pageCountItems;
     }
 
+    return {
+        genPageCountItems,
+        loading,
+        userCount,
+    };
+}
+
+function PagesCount() {
+    const { genPageCountItems, loading } = usePaginationCount();
+
+    if (loading) return <p>Loading...</p>;
+
     return <div className={classes.pagesCount}>{genPageCountItems()}</div>;
+}
+
+function usePagination() {
+	const [paginationSkip, setPaginationSkip] = useAtom(paginationSkipAtom);
+    const { userCount } = usePaginationCount();
+
+    function nextPage() {
+        const nextPage = paginationSkip + 5;
+        if (nextPage < userCount) {
+            setPaginationSkip(nextPage);
+        }
+    }
+
+    function previousPage() {
+        const previusPage = paginationSkip - 5;
+        if (paginationSkip >= 5) {
+            setPaginationSkip(previusPage);
+        }
+    }
+
+	return {
+        nextPage,
+        previousPage,
+    };
+ 
 }
 
 export default function Pagination() {
 
-	const setPaginationSkip = useSetAtom(paginationSkipAtom);
-
+	const { nextPage, previousPage } = usePagination();
+    
     return (
         <div className={classes.pagination}>
-            <AngleAction
-                direction="left"
-                onClick={() => console.log("Left Angle")}
-            />
+            <AngleAction direction="left" onClick={previousPage} />
             <PagesCount />
-            <AngleAction direction="right" onClick={() => setPaginationSkip(state => state + 5)} />
+            <AngleAction direction="right" onClick={nextPage} />
         </div>
     );
 }

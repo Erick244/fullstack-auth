@@ -5,7 +5,7 @@ import { User } from "@/interfaces/User";
 import { gql, useQuery } from "@apollo/client";
 import { useAtomValue } from "jotai";
 
-// criar skeletons screens e botão de mostrar mais
+// criar skeletons screens
 
 const classes = {
     table: `
