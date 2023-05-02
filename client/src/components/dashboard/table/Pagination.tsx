@@ -1,5 +1,6 @@
 "use client";
 import { AngleLeftIcon, AngleRightIcon } from "@/components/utilities/Icons";
+import Spinner from "@/components/utilities/Spinner";
 import { paginationSkipAtom } from "@/contexts/Jotai";
 import { gql, useQuery } from "@apollo/client";
 import { useAtom } from "jotai";
@@ -7,8 +8,8 @@ import { useAtom } from "jotai";
 const classes = {
     pagination: `
 		flex justify-between items-center
-		bg-purple-900 text-white
-		w-11/12  p-2
+		bg-purple-950 text-white
+		w-11/12 p-2 rounded-b
 	`,
     angleAction(direction: "left" | "right") {
         const defaultClasses = "text-xl cursor-pointer ";
@@ -119,7 +120,7 @@ function usePaginationCount() {
 function PagesCount() {
     const { genPageCountItems, loading } = usePaginationCount();
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <Spinner />;
 
     return <div className={classes.pagesCount}>{genPageCountItems()}</div>;
 }

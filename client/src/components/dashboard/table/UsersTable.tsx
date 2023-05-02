@@ -1,5 +1,6 @@
 "use client";
 import ClientGravatar from "@/components/utilities/ClientGravatar";
+import UserTableSkeleton from "@/components/skeletons/UserTableSkeleton";
 import { paginationSkipAtom } from "@/contexts/Jotai";
 import { User } from "@/interfaces/User";
 import { gql, useQuery } from "@apollo/client";
@@ -81,18 +82,14 @@ function Tbody() {
 
     if (loading) {
         return (
-            <tbody>
-                <tr>
-                    <td>Loading...</td>
-                </tr>
-            </tbody>
+            <UserTableSkeleton />
         );
     }
 
     return (
         <tbody>
             {data &&
-                data.users.map((user: User, index: number) => {
+                data.users.map((user: User) => {
                     return (
                         <tr key={user.email} className={classes.tr}>
                             <GravatarTd>
