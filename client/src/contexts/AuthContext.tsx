@@ -9,7 +9,7 @@ interface AuthContextProps {
     isAuthenticated: boolean;
     login: (data: User) => Promise<void>;
     user: User | null;
-	loginLoading: boolean;
+    loginLoading: boolean;
 }
 
 const AuthContext = createContext({} as AuthContextProps);
@@ -17,13 +17,17 @@ const AuthContext = createContext({} as AuthContextProps);
 const LOGIN_USER = gql`
     mutation ($data: LoginInput!) {
         login(data: $data) {
-            token
-            user {
+            data {
                 id
                 name
                 email
+                token
                 createdAt
                 updatedAt
+            }
+            error {
+                status
+                message
             }
         }
     }
@@ -32,11 +36,17 @@ const LOGIN_USER = gql`
 const USER_BY_TOKEN = gql`
     query ($token: String!) {
         userByToken(token: $token) {
-            id
-            name
-            email
-            createdAt
-            updatedAt
+            data {
+                id
+                name
+                email
+                createdAt
+                updatedAt
+            }
+            error {
+                status
+                message
+            }
         }
     }
 `;
@@ -59,16 +69,16 @@ export default function AuthContextProvider({
     });
 
     useEffect(() => {
-        const userByToken = data?.userByToken;
+        const userByToken = data?.userByToken.data;
 
         if (userByToken) {
-            setUser(data.userByToken);
+            setUser(userByToken);
         }
     }, [data?.userByToken]);
 
     const { push } = useRouter();
     const [loginUser, { loading }] = useMutation(LOGIN_USER);
-	const loginLoading = loading;
+    const loginLoading = loading;
 
     async function login(data: User) {
         const userWhithToken = await loginUser({
@@ -77,10 +87,10 @@ export default function AuthContextProvider({
             },
         });
 
-        const user = await userWhithToken.data.login.user;
+        const user = await userWhithToken.data.login.data;
         setUser(user);
 
-        const token = await userWhithToken.data.login.token;
+        const token = await userWhithToken.data.login.data.token;
         const tokenExpiration = 60 * 60 * 60 * 24 * 7; // 7 days
 
         setCookie(undefined, "fullstack-auth-token", token, {

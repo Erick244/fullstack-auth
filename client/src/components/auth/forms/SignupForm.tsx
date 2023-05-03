@@ -15,7 +15,9 @@ interface SignupFormProps {
 const SIGNUP_USER = gql`
     mutation ($data: SignupInput!) {
         signup(data: $data) {
-            id
+            data {
+				id
+			}
         }
     }
 `;

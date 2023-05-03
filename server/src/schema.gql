@@ -8,14 +8,19 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+type Error {
+  message: String!
+  status: Float!
+}
+
 input LoginInput {
   email: String!
   password: String!
 }
 
 type Mutation {
-  login(data: LoginInput!): UserWhithToken!
-  signup(data: SignupInput!): User!
+  login(data: LoginInput!): UserOrError!
+  signup(data: SignupInput!): UserOrError!
 }
 
 input Pagination {
@@ -24,7 +29,7 @@ input Pagination {
 }
 
 type Query {
-  userByToken(token: String!): User
+  userByToken(token: String!): UserOrError!
   userCount: Float!
   users(pagination: Pagination!): [User!]!
 }
@@ -41,11 +46,11 @@ type User {
   email: String!
   id: ID!
   name: String!
-  password: String!
+  token: String!
   updatedAt: DateTime!
 }
 
-type UserWhithToken {
-  token: String!
-  user: User!
+type UserOrError {
+  data: User
+  error: Error
 }

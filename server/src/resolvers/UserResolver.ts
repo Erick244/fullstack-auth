@@ -1,11 +1,13 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { User, UserWhithToken } from "../models/User";
+import User from "../models/user/User";
 import { PrismaContext } from "../contexts/Prisma.context";
 import SignuptInput from "../inputs/SignupInput";
 import { compare, hash } from "bcryptjs";
 import LoginInput from "../inputs/LoginInput";
 import { randomUUID } from "crypto";
 import Pagination from "../inputs/Pagination";
+import UserOrError from "../models/user/UserOrError";
+import Error from "../models/Error";
 
 // Criar tratamento de erros!
 
@@ -25,38 +27,42 @@ export class UserResolver {
         return users;
     }
 
-    @Query(() => User, { nullable: true })
+    @Query(() => UserOrError)
     async userByToken(
         @Arg("token") token: string,
         @Ctx() ctx: PrismaContext
-    ): Promise<User | null> {
-        const DbToken = await ctx.prisma.token.findMany({
+    ): Promise<UserOrError> {
+        const DbToken = await ctx.prisma.token.findUnique({
             where: { token },
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        createdAt: true,
-                        updatedAt: true,
-                    },
-                },
+                user: true,
             },
         });
 
-        if (!DbToken) return null;
-        const user = DbToken[0].user;
+        const userNotFound = new Error("User not found", 401);
 
-        return user;
+        if (!DbToken) {
+            return { error: userNotFound };
+        }
+
+        const user = DbToken.user;
+
+        return {
+            data: {
+                ...user,
+            },
+        };
     }
 
-    @Mutation(() => User)
+    @Mutation(() => UserOrError)
     async signup(
         @Arg("data") data: SignuptInput,
         @Ctx() ctx: PrismaContext
-    ): Promise<User | null> {
-        if (data.password !== data.confirmPassword) return null;
+    ): Promise<UserOrError> {
+        const passwordsDoNotMatch = new Error("Passwords do not match", 401);
+        if (data.password !== data.confirmPassword) {
+            return { error: passwordsDoNotMatch };
+        }
 
         const encryptedPassword = await hash(data.password, 10);
         const user = await ctx.prisma.user.create({
@@ -66,14 +72,19 @@ export class UserResolver {
                 password: encryptedPassword,
             },
         });
-        return user;
+
+        return {
+            data: {
+                ...user,
+            },
+        };
     }
 
-    @Mutation(() => UserWhithToken)
+    @Mutation(() => UserOrError)
     async login(
         @Arg("data") data: LoginInput,
         @Ctx() ctx: PrismaContext
-    ): Promise<{ user: User; token: string } | null> {
+    ): Promise<UserOrError> {
         const user = await ctx.prisma.user.findUnique({
             where: { email: data.email },
             include: {
@@ -81,10 +92,13 @@ export class UserResolver {
             },
         });
 
-        if (!user) return null;
+        const userNotFound = new Error("User not found", 401);
+        if (!user) return { error: userNotFound };
 
         const passwordIsValid = compare(data.password, user.password);
-        if (!passwordIsValid) return null;
+
+        const invalidPassword = new Error("Invalid password", 401);
+        if (!passwordIsValid) return { error: invalidPassword };
 
         const userTokenId = user.token[0]?.id;
         if (userTokenId) {
@@ -103,23 +117,25 @@ export class UserResolver {
             },
         });
 
-        const userAndToken = {
+        const userWhithToken = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
             token: token.token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
-            },
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
         };
 
-        return userAndToken;
+        return {
+            data: {
+                ...userWhithToken,
+            },
+        };
     }
 
     @Query(() => Number)
     async userCount(@Ctx() ctx: PrismaContext): Promise<Number> {
-		const userCount = await ctx.prisma.user.count();
-		return userCount;
-	}
+        const userCount = await ctx.prisma.user.count();
+        return userCount;
+    }
 }
