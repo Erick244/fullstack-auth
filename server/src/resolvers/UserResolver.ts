@@ -65,19 +65,25 @@ export class UserResolver {
         }
 
         const encryptedPassword = await hash(data.password, 10);
-        const user = await ctx.prisma.user.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                password: encryptedPassword,
-            },
-        });
 
-        return {
-            data: {
-                ...user,
-            },
-        };
+        try {
+            const user = await ctx.prisma.user.create({
+                data: {
+                    name: data.name,
+                    email: data.email,
+                    password: encryptedPassword,
+                },
+            });
+
+            return {
+                data: {
+                    ...user,
+                },
+            };
+        } catch (e: any) {
+            const alreadyUsedEmail = new Error("Already used e-mail", 404);
+            return { error: alreadyUsedEmail };
+        }
     }
 
     @Mutation(() => UserOrError)
@@ -95,7 +101,7 @@ export class UserResolver {
         const userNotFound = new Error("User not found", 401);
         if (!user) return { error: userNotFound };
 
-        const passwordIsValid = compare(data.password, user.password);
+        const passwordIsValid = await compare(data.password, user.password);
 
         const invalidPassword = new Error("Invalid password", 401);
         if (!passwordIsValid) return { error: invalidPassword };

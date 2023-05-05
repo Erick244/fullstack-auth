@@ -3,14 +3,10 @@ import { destroyCookie } from "nookies";
 import { MenuItem } from "../dashboard/menu/DropDownMenu";
 import { LogOutIcon } from "./Icons";
 import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function LogOutItem() {
-    const { push } = useRouter();
+    const { logOut } = useAuthContext();
 
-    function handlerLogOut() {
-        destroyCookie(undefined, "fullstack-auth-token");
-        push("/auth");
-    }
-
-    return <MenuItem action={handlerLogOut} label="Logout" icon={LogOutIcon} />;
+    return <MenuItem action={logOut} label="Logout" icon={LogOutIcon} />;
 }

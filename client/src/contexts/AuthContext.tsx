@@ -1,15 +1,17 @@
 "use client";
 import { User } from "@/interfaces/User";
 import { gql, useMutation, useQuery } from "@apollo/client";
-import { createContext, useContext, useEffect, useState } from "react";
-import { setCookie, parseCookies } from "nookies";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { setCookie, parseCookies, destroyCookie } from "nookies";
 import { useRouter } from "next/navigation";
+import { toast, Id } from "react-toastify";
 
 interface AuthContextProps {
     isAuthenticated: boolean;
-    login: (data: User) => Promise<void>;
+    login: (data: User) => Promise<Id | undefined>;
     user: User | null;
     loginLoading: boolean;
+    logOut: () => void;
 }
 
 const AuthContext = createContext({} as AuthContextProps);
@@ -26,7 +28,6 @@ const LOGIN_USER = gql`
                 updatedAt
             }
             error {
-                status
                 message
             }
         }
@@ -44,7 +45,6 @@ const USER_BY_TOKEN = gql`
                 updatedAt
             }
             error {
-                status
                 message
             }
         }
@@ -60,7 +60,9 @@ export default function AuthContextProvider({
 }) {
     const [user, setUser] = useState<User | null>(null);
     const isAuthenticated = !!user;
-
+	const { push } = useRouter();
+    const [loginUser, { loading }] = useMutation(LOGIN_USER);
+    const loginLoading = loading;
     const { data } = useQuery(USER_BY_TOKEN, {
         variables: {
             token,
@@ -68,17 +70,26 @@ export default function AuthContextProvider({
         fetchPolicy: "cache-and-network",
     });
 
+	const logOut = useCallback(() => {
+		destroyCookie(undefined, "fullstack-auth-token");
+        push("/auth");
+	}, [push])
+	
+
     useEffect(() => {
         const userByToken = data?.userByToken.data;
+        const userByTokenError = data?.userByToken.error;
 
         if (userByToken) {
             setUser(userByToken);
+        } else if (userByTokenError) {
+            toast(userByTokenError.message, {
+                type: "error",
+                position: "bottom-right",
+            });
+            logOut();
         }
-    }, [data?.userByToken]);
-
-    const { push } = useRouter();
-    const [loginUser, { loading }] = useMutation(LOGIN_USER);
-    const loginLoading = loading;
+    }, [data?.userByToken, logOut]);
 
     async function login(data: User) {
         const userWhithToken = await loginUser({
@@ -86,6 +97,9 @@ export default function AuthContextProvider({
                 data,
             },
         });
+
+		const loginError = userWhithToken.data.login.error;
+		if (loginError) return toast(loginError.message, { type: "error" });
 
         const user = await userWhithToken.data.login.data;
         setUser(user);
@@ -102,7 +116,13 @@ export default function AuthContextProvider({
 
     return (
         <AuthContext.Provider
-            value={{ isAuthenticated, login, user, loginLoading }}
+            value={{
+                isAuthenticated,
+                login,
+                user,
+                loginLoading,
+                logOut,
+            }}
         >
             {children}
         </AuthContext.Provider>

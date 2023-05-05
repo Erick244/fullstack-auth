@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupFormData, signupFormSchema } from "@/schemas/zodAuthFormSchemas";
 import { gql, useMutation } from "@apollo/client";
+import { toast } from "react-toastify";
 
 interface SignupFormProps {
     toggleMode: () => void;
@@ -15,8 +16,8 @@ interface SignupFormProps {
 const SIGNUP_USER = gql`
     mutation ($data: SignupInput!) {
         signup(data: $data) {
-            data {
-				id
+			error {
+				message
 			}
         }
     }
@@ -34,13 +35,19 @@ function SignupForm({ formMode, toggleMode }: SignupFormProps) {
     const [signupUser, { loading }] = useMutation(SIGNUP_USER);
 
     async function handlerSignup(data: SignupFormData) {
-        await signupUser({
+        const createdUser = await signupUser({
             variables: {
                 data,
             },
         });
 
-        toggleMode();
+		const signupError = createdUser.data.signup.error;
+		
+		if (signupError) {
+			return toast(signupError.message, { type: "warning" });
+		}
+
+		toggleMode();
     }
 
     return (
