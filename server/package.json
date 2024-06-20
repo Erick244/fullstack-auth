@@ -7,17 +7,17 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
   },
   "dependencies": {
-    "@prisma/client": "^4.12.0",
-    "@types/bcryptjs": "^2.4.2",
-    "@types/node": "^18.15.11",
-    "apollo-server": "^3.12.0",
+    "@prisma/client": "^4.16.2",
+    "@types/bcryptjs": "^2.4.5",
+    "@types/node": "^18.18.7",
+    "apollo-server": "^3.12.1",
     "bcryptjs": "^2.4.3",
     "class-validator": "^0.14.0",
-    "graphql": "^15.3.0",
-    "prisma": "^4.12.0",
+    "graphql": "^15.8.0",
+    "prisma": "^4.16.2",
     "reflect-metadata": "^0.1.13",
     "ts-node-dev": "^2.0.0",
     "type-graphql": "^1.1.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.2.2"
   }
 }
